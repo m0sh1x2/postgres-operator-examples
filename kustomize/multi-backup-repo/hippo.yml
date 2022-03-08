@@ -1,7 +1,7 @@
 apiVersion: postgres-operator.crunchydata.com/v1beta1
 kind: PostgresCluster
 metadata:
-  name: rabotili
+  name: hippo
 spec:
   image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:centos8-14.2-0
   postgresVersion: 14
@@ -16,18 +16,19 @@ spec:
     pgbackrest:
       image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:centos8-2.36-1
       configuration:
-        - secret:
-            name: pgo-s3-creds
-      global:
-        repo1-path: /debug/dev/repo01
-        repo1-retention-full: "14"
-        repo1-retention-full-type: count
+      # - secret:
+      #     name: hippo-pgbackrest-secrets
+      # global:
+      #   repo1-cipher-type: aes-256-cbc
       repos:
         - name: repo1
           schedules:
             full: "0 1 * * *"
             incremental: "0 */4 * * *"
-          s3:
-            bucket: "devcluster"
-            endpoint: "s3.eu-west-1.wasabisys.com"
-            region: "eu-west-1"
+          volume:
+            volumeClaimSpec:
+              accessModes:
+                - "ReadWriteOnce"
+              resources:
+                requests:
+                  storage: 1Gi

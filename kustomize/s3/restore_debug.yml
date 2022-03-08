@@ -1,12 +1,13 @@
 apiVersion: postgres-operator.crunchydata.com/v1beta1
 kind: PostgresCluster
 metadata:
-  name: hippo-s3
+  name: hippo-restore
 spec:
   image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:centos8-13.5-0
   postgresVersion: 13
   instances:
-    - dataVolumeClaimSpec:
+    - replicas: 2
+      dataVolumeClaimSpec:
         accessModes:
           - "ReadWriteOnce"
         resources:
@@ -23,13 +24,13 @@ spec:
         - secret:
             name: pgo-s3-creds
       global:
-        repo1-path: /s3debug/repo01
+        repo1-path: /pgbackrest/postgres-operator/hippo-s3/repo1
       repos:
         - name: repo1
-          schedules:
-            full: "0 1 * * *"
-            incremental: "0 */4 * * *"
           s3:
             bucket: "crunchydata"
             endpoint: "s3.eu-west-1.wasabisys.com"
             region: "eu-west-1"
+  standby:
+    enabled: true
+    repoName: repo1
